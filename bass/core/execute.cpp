@@ -174,7 +174,7 @@ auto Bass::executeInstruction(Instruction& i) -> bool {
     return true;
   }
 
-  if(assemble(s)) {
+  if(assemble({s, i.comment})) {
     return true;
   }
 

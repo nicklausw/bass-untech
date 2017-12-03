@@ -9,8 +9,8 @@ auto Bass::initialize() -> void {
   nextLabelCounter = 1;
 }
 
-auto Bass::assemble(const string& statement) -> bool {
-  string s = statement;
+auto Bass::assemble(const Line line) -> bool {
+  string s = line.statement;
 
   if(s.match("block {")) return true;
   if(s.match("} endblock")) return true;
@@ -282,5 +282,5 @@ auto Bass::assemble(const string& statement) -> bool {
     return true;
   }
 
-  return architecture->assemble(statement);
+  return architecture->assemble(line);
 }

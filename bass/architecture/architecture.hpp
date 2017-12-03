@@ -5,7 +5,7 @@ struct Architecture {
   virtual ~Architecture() {
   }
 
-  virtual auto assemble(const string& statement) -> bool {
+  virtual auto assemble(const Bass::Line line) -> bool {
     return false;
   }
 
@@ -29,6 +29,10 @@ struct Architecture {
 
   auto write(uint64_t data, uint length = 1) -> void {
     return self.write(data, length);
+  }
+
+  auto writeComment(int64_t value, const string& comment) -> void {
+    return self.writeComment(value, comment);
   }
 
   template<typename... P> auto notice(P&&... p) -> void {

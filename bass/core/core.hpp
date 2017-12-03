@@ -14,6 +14,7 @@ struct Bass {
 
   struct Instruction {
     string statement;
+    string comment;
     uint ip;
 
     uint fileNumber;
@@ -90,6 +91,16 @@ struct Bass {
     string type;
   };
 
+  struct Line {
+    string statement;
+    string comment;
+  };
+
+  struct Comment {
+    int64_t offset;
+    string comment;
+  };
+
 protected:
   auto analyzePhase() const -> bool { return phase == Phase::Analyze; }
   auto queryPhase() const -> bool { return phase == Phase::Query; }
@@ -99,6 +110,8 @@ protected:
   auto pc() const -> uint;
   auto seek(uint offset) -> void;
   auto write(uint64_t data, uint length = 1) -> void;
+  auto writeComment(int64_t value, const string& comment) -> void;
+  auto outputComments() -> void;
   auto writeSymbolLabel(int64_t value, const string& name) -> void;
 
   auto printInstruction() -> void;
@@ -125,7 +138,7 @@ protected:
 
   //assemble.cpp
   auto initialize() -> void;
-  auto assemble(const string& statement) -> bool;
+  auto assemble(const Line line) -> bool;
 
   //utility.cpp
   auto setMacro(const string& name, const string_vector& parameters, uint ip, bool inlined, Frame::Level level) -> void;
@@ -156,6 +169,7 @@ protected:
 
   //internal state
   Instruction* activeInstruction = nullptr;  //used by notice, warning, error
+  vector<Comment> comments;       //comments for symbol file
   vector<Instruction> program;    //parsed source code statements
   vector<Block> blocks;           //track the start and end of blocks
   set<Define> defines;            //defines specified on the terminal

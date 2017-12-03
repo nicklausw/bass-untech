@@ -4,8 +4,8 @@ Table::Table(Bass& self, const string& table) : Architecture(self) {
   parseTable(table);
 }
 
-auto Table::assemble(const string& statement) -> bool {
-  string s = statement;
+auto Table::assemble(const Bass::Line line) -> bool {
+  string s = line.statement;
 
   if(s.match("instrument \"*\"")) {
     s.trim("instrument \"", "\"", 1L);
@@ -70,6 +70,8 @@ auto Table::assemble(const string& statement) -> bool {
         }
       }
     }
+
+    writeComment(pc, line.comment);
 
     return true;
   }

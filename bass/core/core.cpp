@@ -28,6 +28,8 @@ auto Bass::symFile(const string& filename) -> bool {
     return false;
   }
 
+  symbolFile.print("#SNES65816\n\n[SYMBOL]\n");
+
   return true;
 }
 
@@ -45,7 +47,9 @@ auto Bass::source(const string& filename) -> bool {
 
   auto lines = data.split("\n");
   for(uint lineNumber : range(lines)) {
+    string comment = "";
     if(auto position = lines[lineNumber].qfind("//")) {
+      comment = lines[lineNumber].qsplit("//", 1)(1).strip();
       lines[lineNumber].resize(position());  //remove comments
     }
 
@@ -61,6 +65,7 @@ auto Bass::source(const string& filename) -> bool {
       } else {
         Instruction instruction;
         instruction.statement = statement;
+        instruction.comment = comment;
         instruction.fileNumber = fileNumber;
         instruction.lineNumber = 1 + lineNumber;
         instruction.blockNumber = 1 + blockNumber;
@@ -98,6 +103,7 @@ auto Bass::assemble(bool strict) -> bool {
     phase = Phase::Write;
     architecture = new Architecture{*this};
     execute();
+    outputComments();
   } catch(...) {
     return false;
   }
@@ -129,11 +135,26 @@ auto Bass::write(uint64_t data, uint length) -> void {
   origin += length;
 }
 
+auto Bass::writeComment(int64_t value, const string& comment) -> void {
+  if(writePhase() && comment != "") {
+    comments.append({value, comment});
+  }
+}
+
+auto Bass::outputComments() -> void {
+  if(writePhase() && symbolFile.open()) {
+    symbolFile.print("\n[COMMENT]\n");
+    for(auto c : comments) {
+      symbolFile.print(hex(c.offset >> 16, 2), ':', hex(c.offset, 4), " \"", c.comment, "\"\n");
+    }
+  }
+}
+
 auto Bass::writeSymbolLabel(int64_t value, const string& name) -> void {
   if(writePhase()) {
     if(symbolFile.open()) {
       string scopedName = {scope.merge("."), scope ? "." : "", name};
-      symbolFile.print(hex(value, 8), ' ', scopedName, '\n');
+      symbolFile.print(hex(value >> 16, 2), ':', hex(value, 4), ' ', scopedName, " ANY 1\n");
     }
   }
 }
