@@ -96,9 +96,9 @@ struct Bass {
     string comment;
   };
 
-  struct Comment {
+  struct Symbol {
     int64_t offset;
-    string comment;
+    string name;
   };
 
 protected:
@@ -111,7 +111,6 @@ protected:
   auto seek(uint offset) -> void;
   auto write(uint64_t data, uint length = 1) -> void;
   auto writeComment(int64_t value, const string& comment) -> void;
-  auto outputComments() -> void;
   auto writeSymbolLabel(int64_t value, const string& name) -> void;
 
   auto printInstruction() -> void;
@@ -169,7 +168,8 @@ protected:
 
   //internal state
   Instruction* activeInstruction = nullptr;  //used by notice, warning, error
-  vector<Comment> comments;       //comments for symbol file
+  vector<Symbol> comments;        //comments for symbol file
+  vector<Symbol> symbols;         //symbols for symbol file
   vector<Instruction> program;    //parsed source code statements
   vector<Block> blocks;           //track the start and end of blocks
   set<Define> defines;            //defines specified on the terminal

@@ -28,7 +28,17 @@ auto Bass::symFile(const string& filename) -> bool {
     return false;
   }
 
-  symbolFile.print("#SNES65816\n\n[SYMBOL]\n");
+  symbolFile.print("#SNES65816\n");
+  
+  symbolFile.print("\n[SYMBOL]\n");
+  for(auto c : symbols) {
+    symbolFile.print(hex(c.offset >> 16, 2), ':', hex(c.offset, 4), ' ', c.name, " ANY 1\n");
+  }
+
+  symbolFile.print("\n[COMMENT]\n");
+  for(auto c : comments) {
+    symbolFile.print(hex(c.offset >> 16, 2), ':', hex(c.offset, 4), " \"", c.name, "\"\n");
+  }
 
   return true;
 }
@@ -103,7 +113,6 @@ auto Bass::assemble(bool strict) -> bool {
     phase = Phase::Write;
     architecture = new Architecture{*this};
     execute();
-    outputComments();
   } catch(...) {
     return false;
   }
@@ -141,21 +150,10 @@ auto Bass::writeComment(int64_t value, const string& comment) -> void {
   }
 }
 
-auto Bass::outputComments() -> void {
-  if(writePhase() && symbolFile.open()) {
-    symbolFile.print("\n[COMMENT]\n");
-    for(auto c : comments) {
-      symbolFile.print(hex(c.offset >> 16, 2), ':', hex(c.offset, 4), " \"", c.comment, "\"\n");
-    }
-  }
-}
-
 auto Bass::writeSymbolLabel(int64_t value, const string& name) -> void {
   if(writePhase()) {
-    if(symbolFile.open()) {
-      string scopedName = {scope.merge("."), scope ? "." : "", name};
-      symbolFile.print(hex(value >> 16, 2), ':', hex(value, 4), ' ', scopedName, " ANY 1\n");
-    }
+    string scopedName = {scope.merge("."), scope ? "." : "", name};
+    symbols.append({value, scopedName});
   }
 }
 

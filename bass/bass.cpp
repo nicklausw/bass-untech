@@ -94,9 +94,6 @@ auto nall::main(string_vector args) -> void {
   clock_t clockStart = clock();
   Bass bass;
   bass.target(targetFilename, create);
-  if(symFilename) {
-    bass.symFile(symFilename);
-  }
   for(auto& sourceFilename : sourceFilenames) {
     bass.source(sourceFilename);
   }
@@ -111,6 +108,9 @@ auto nall::main(string_vector args) -> void {
   if(!bass.assemble(strict)) {
     print(stderr, "bass: assembly failed\n");
     exit(EXIT_FAILURE);
+  }
+  if(symFilename) {
+    bass.symFile(symFilename);
   }
   clock_t clockFinish = clock();
   if(benchmark) {
