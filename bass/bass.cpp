@@ -32,6 +32,7 @@ auto nall::main(string_vector args) -> void {
   bool create = false;
   bool strict = false;
   bool benchmark = false;
+  bool requireModifier = false;
   string_vector sourceFilenames;
 
   for(uint n = 1; n < args.size();) {
@@ -81,6 +82,12 @@ auto nall::main(string_vector args) -> void {
       continue;
     }
 
+    if(s == "-require-modifier") {
+      requireModifier = true;
+      n += 1;
+      continue;
+    }
+
     if(!s.beginsWith("-")) {
       sourceFilenames.append(s);
       n += 1;
@@ -94,6 +101,7 @@ auto nall::main(string_vector args) -> void {
   clock_t clockStart = clock();
   Bass bass;
   bass.target(targetFilename, create);
+  bass.requireModifier = requireModifier;
   for(auto& sourceFilename : sourceFilenames) {
     bass.source(sourceFilename);
   }

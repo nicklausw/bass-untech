@@ -27,7 +27,7 @@ auto Table::assemble(const Bass::Line line) -> bool {
       if(format.type == Format::Type::Absolute) {
         if(format.match != Format::Match::Weak) {
           uint bits = bitLength(args[format.argument]);
-          if(modifier == false) error("no modifier used");
+          if(modifier == false && self.requireModifier) error("no modifier used");
           if(bits != opcode.number[format.argument].bits) {
             if(format.match == Format::Match::Exact || bits != 0) {
               mismatch = true;
