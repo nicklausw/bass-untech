@@ -87,6 +87,12 @@ auto Bass::executeInstruction(Instruction& i) -> bool {
     return true;
   }
 
+  if(s.match("file ?*")) {
+    auto p = s.trimLeft("file ", 1L).split("=", 1L).strip();
+    setFile(p(0), p(1));
+    return true;
+  }
+
   if(global || parent) error("invalid frame specifier");
 
   if(s.match("if ?* {")) {

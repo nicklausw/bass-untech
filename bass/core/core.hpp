@@ -70,6 +70,31 @@ struct Bass {
 
   using Constant = Variable;  //Variable and Constant structures are identical
 
+  struct File {
+    File(const string& name) : name(name) {}
+    File(const string& name, const string& fileName) : name(name), fileName(fileName) {
+      data = file::read(fileName);
+      size = file::size(fileName);
+      lastByte = 0;
+    }
+
+    auto read() -> uint8_t {
+      lastByte++;
+      return data[lastByte-1];
+    }
+    auto read(const uint offset) -> uint8_t {
+      lastByte = offset + 1;
+      return data[offset];
+    }
+
+    auto hash() const -> uint { return name.hash(); }
+    auto operator==(const File& source) const -> bool { return name == source.name; }
+
+    string name, fileName;
+    vector<uint8_t> data;
+    uint lastByte, size;
+  };
+
   struct Frame {
     enum class Level : uint {
       Inline,  //use deepest frame (eg for parameters)
@@ -159,6 +184,9 @@ protected:
   auto findConstant(const string& name) -> maybe<Constant&>;
   auto findConstantName(const string& name) -> maybe<string>;
 
+  auto setFile(const string& name, const string& fileName) -> void;
+  auto findFile(const string& name) -> maybe<File&>;
+
   auto evaluateDefines(string& statement) -> void;
 
   auto filepath() -> string;
@@ -177,6 +205,7 @@ protected:
   set<Define> defines;            //defines specified on the terminal
   hashset<string> constantNames;  //set of constant names, including those with unknown values
   hashset<Constant> constants;    //constants support forward-declaration
+  hashset<File> files;            //files opened
   vector<Frame> frames;           //macros, defines and variables do not
   vector<bool> conditionals;      //track conditional matching
   string_vector queue;            //track enqueue, dequeue directives
