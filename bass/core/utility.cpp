@@ -212,16 +212,14 @@ auto Bass::findConstantName(const string& name) -> maybe<string> {
   return nothing;
 }
 
-auto Bass::setFile(const string& name, const string& fileName) -> void {
-  if(files.find({name})) {
-    //error("file label taken");
-  }
-  files.insert({name, fileName});
+auto Bass::setFile(const string& name, const string& fileName, Bass* self) -> void {
+  setConstant(name, queryPhase() ? files.size() : files.size() - 1);
+  files.append({name, fileName, this});
 }
 
 auto Bass::findFile(const string& name) -> maybe<File&> {
   if(auto file = files.find({name})) {
-    return file();
+    return files[file()];
   }
   return nothing;
 }
@@ -237,19 +235,12 @@ auto Bass::evaluateDefines(string& s) -> void {
         s = {slice(s, 0, x), findDefine(name) ? 1 : 0, slice(s, y + 1)};
         return evaluateDefines(s);
       }
-
-      if(name.match("read ?*")) {
-        name.trimLeft("read ", 1L).strip();
-        auto p = name.split(",", 1L);
-        if(p.size() < 1 || p.size() > 2) {
-          error("invalid number of parameters");
-        }
-        if(auto file = findFile(p(0))) {
-          s = {slice(s, 0, x), p.size() == 1 ? file().read() : file().read(evaluate(p(1))), slice(s, y + 1)};
-          return evaluateDefines(s);
-        } else {
-          error("invalid file name");
-        }
+      if(name.match("size ?*")) {
+        name.trimLeft("size ",1L).strip();
+        name.trim('\"','\"',1L);
+        if(!file::exists(name)) error("file doesn't exist");
+        s = {slice(s, 0, x), file::size(name), slice(s, y + 1)};
+        return evaluateDefines(s);
       }
 
       string_vector parameters;

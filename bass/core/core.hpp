@@ -72,7 +72,8 @@ struct Bass {
 
   struct File {
     File(const string& name) : name(name) {}
-    File(const string& name, const string& fileName) : name(name), fileName(fileName) {
+    File(const string& name, const string& fileName, Bass* self) : name(name), fileName(fileName), self(self) {
+      if(!file::exists(fileName)) self->error("file doesn't exist");
       data = file::read(fileName);
       size = file::size(fileName);
       lastByte = 0;
@@ -86,6 +87,9 @@ struct Bass {
       lastByte = offset + 1;
       return data[offset];
     }
+    auto eof() -> uint {
+      return lastByte == size ? 1 : 0;
+    }
 
     auto hash() const -> uint { return name.hash(); }
     auto operator==(const File& source) const -> bool { return name == source.name; }
@@ -93,6 +97,7 @@ struct Bass {
     string name, fileName;
     vector<uint8_t> data;
     uint lastByte, size;
+    Bass* self;
   };
 
   struct Frame {
@@ -184,7 +189,7 @@ protected:
   auto findConstant(const string& name) -> maybe<Constant&>;
   auto findConstantName(const string& name) -> maybe<string>;
 
-  auto setFile(const string& name, const string& fileName) -> void;
+  auto setFile(const string& name, const string& fileName, Bass* self) -> void;
   auto findFile(const string& name) -> maybe<File&>;
 
   auto evaluateDefines(string& statement) -> void;
@@ -205,7 +210,7 @@ protected:
   set<Define> defines;            //defines specified on the terminal
   hashset<string> constantNames;  //set of constant names, including those with unknown values
   hashset<Constant> constants;    //constants support forward-declaration
-  hashset<File> files;            //files opened
+  vector<File> files;             //files opened
   vector<Frame> frames;           //macros, defines and variables do not
   vector<bool> conditionals;      //track conditional matching
   string_vector queue;            //track enqueue, dequeue directives

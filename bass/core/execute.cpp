@@ -89,7 +89,7 @@ auto Bass::executeInstruction(Instruction& i) -> bool {
 
   if(s.match("file ?*")) {
     auto p = s.trimLeft("file ", 1L).split("=", 1L).strip();
-    setFile(p(0), p(1));
+    setFile(p(0), p(1), this);
     return true;
   }
 

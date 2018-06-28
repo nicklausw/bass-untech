@@ -75,6 +75,25 @@ auto Bass::evaluateExpression(Eval::Node* node, Evaluation mode) -> int64_t {
   if(name == "base") return base;
   if(name == "pc") return pc();
 
+  if(name == "eof#1") {
+    if(parameters.size() != 1) error("invalid number of parameters");
+    if(parameters(0) < files.size()) {
+      print("getting eof...", files[parameters(0)].eof(), "\n");
+      return files[parameters(0)].eof();
+    } else {
+      error("file doesn't exist");
+    }
+  }
+  if(name == "read#1") {
+    if(parameters.size() != 1) error("invalid number of parameters");
+    if(parameters(0) < files.size()) {
+            print("getting read....", files[parameters(0)].read(), "\n");
+      return files[parameters(0)].read();
+    } else {
+      error("file doesn't exist");
+    }
+  }
+
   if(auto expression = findExpression(name)) {
     if(parameters) frames.append({0, true});
     for(auto n : range(parameters.size())) {
