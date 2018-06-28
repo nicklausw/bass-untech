@@ -15,13 +15,14 @@ auto nall::main(string_vector args) -> void {
     print(stderr, "usage: bass-untech [options] source [source ...]\n");
     print(stderr, "\n");
     print(stderr, "options:\n");
-    print(stderr, "  -o target        specify default output filename [overwrite]\n");
-    print(stderr, "  -m target        specify default output filename [modify]\n");
-    print(stderr, "  -d name[=value]  create define with optional value\n");
-    print(stderr, "  -c name[=value]  create constant with optional value\n");
-    print(stderr, "  -sym filename    create symbol file\n");
-    print(stderr, "  -strict          upgrade warnings to errors\n");
-    print(stderr, "  -benchmark       benchmark performance\n");
+    print(stderr, "  -o target             specify default output filename [overwrite]\n");
+    print(stderr, "  -m target             specify default output filename [modify]\n");
+    print(stderr, "  -d name[=value]       create define with optional value\n");
+    print(stderr, "  -c name[=value]       create constant with optional value\n");
+    print(stderr, "  -sym-snes filename    create bsnes symbol file\n");
+    print(stderr, "  -sym filename         create symbol file\n");
+    print(stderr, "  -strict               upgrade warnings to errors\n");
+    print(stderr, "  -benchmark            benchmark performance\n");
     exit(EXIT_FAILURE);
   }
 
@@ -33,6 +34,7 @@ auto nall::main(string_vector args) -> void {
   bool strict = false;
   bool benchmark = false;
   bool requireModifier = false;
+  bool symSNES;
   string_vector sourceFilenames;
 
   for(uint n = 1; n < args.size();) {
@@ -66,6 +68,14 @@ auto nall::main(string_vector args) -> void {
 
     if(s == "-sym") {
       symFilename = args(n + 1, "");
+      symSNES = false;
+      n += 2;
+      continue;
+    }
+
+    if(s == "-sym-snes") {
+      symFilename = args(n + 1, "");
+      symSNES = true;
       n += 2;
       continue;
     }
@@ -118,7 +128,7 @@ auto nall::main(string_vector args) -> void {
     exit(EXIT_FAILURE);
   }
   if(symFilename) {
-    bass.symFile(symFilename);
+    bass.symFile(symFilename, symSNES);
   }
   clock_t clockFinish = clock();
   if(benchmark) {

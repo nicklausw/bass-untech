@@ -2,7 +2,7 @@ struct Architecture;
 
 struct Bass {
   auto target(const string& filename, bool create) -> bool;
-  auto symFile(const string& filename) -> bool;
+  auto symFile(const string& filename, bool symSNES) -> bool;
   auto source(const string& filename) -> bool;
   auto define(const string& name, const string& value) -> void;
   auto constant(const string& name, const string& value) -> void;

@@ -19,7 +19,7 @@ auto Bass::target(const string& filename, bool create) -> bool {
   return true;
 }
 
-auto Bass::symFile(const string& filename) -> bool {
+auto Bass::symFile(const string& filename, bool symSNES) -> bool {
   if(symbolFile.open()) symbolFile.close();
   if(!filename) return true;
 
@@ -28,15 +28,18 @@ auto Bass::symFile(const string& filename) -> bool {
     return false;
   }
 
-  symbolFile.print("#SNES65816\n");
-  
-  symbolFile.print("\n[SYMBOL]\n");
-  for(auto c : symbols) {
-    symbolFile.print(hex(c.offset >> 16, 2), ':', hex(c.offset, 4), ' ', c.name, " ANY 1\n");
+  if(symSNES) {
+    symbolFile.print("#SNES65816\n");
+    symbolFile.print("\n[SYMBOL]\n");
   }
 
-  symbolFile.print("\n[COMMENT]\n");
+  for(auto c : symbols) {
+    symbolFile.print(hex(c.offset >> 16, 2), ':', hex(c.offset, 4), ' ', c.name, symSNES ? " ANY 1\n" : "\n");
+  }
+
+  if(symSNES)
   for(auto c : comments) {
+    symbolFile.print("\n[COMMENT]\n");
     symbolFile.print(hex(c.offset >> 16, 2), ':', hex(c.offset, 4), " \"", c.name, "\"\n");
   }
 
